@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Snake con Ropa 🍓</title>
+  <style>
+    body { background: black; color: white; text-align: center; }
+    canvas { background: black; display: block; margin: auto; }
+  </style>
+</head>
+<body>
+  <h2>Snake con Ropa 🍓</h2>
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+  <p>Puntos: <span id="score">0</span></p>
+  <p>Skin: <span id="skinName">Sin ropa</span></p>
+  <p>Controles: Flechas para mover, T para cambiar skin</p>
+
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const TAM = 20;
+    let snake = [{x: 300, y: 200}];
+    let dx = 0, dy = 0;
+    let comida = {x: 100, y: 100};
+    let score = 0;
+
+    // Skins (simples con colores)
+    const skins = {
+      1: {nombre: "Sin ropa", color: "purple"},
+      2: {nombre: "Gorra", color: "blue"},
+      3: {nombre: "Lentes", color: "cyan"},
+      4: {nombre: "Bufanda", color: "pink"}
+    };
+    let skin_actual = 1;
+
+    function drawSnake() {
+      snake.forEach((bloque, i) => {
+        ctx.fillStyle = skins[skin_actual].color;
+        ctx.fillRect(bloque.x, bloque.y, TAM, TAM);
+      });
+    }
+
+    function drawFood() {
+      ctx.fillStyle = "hotpink";
+      ctx.fillRect(comida.x, comida.y, TAM, TAM);
+    }
+
+    function update() {
+      const head = {x: snake[snake.length-1].x + dx, y: snake[snake.length-1].y + dy};
+      snake.push(head);
+
+      if (head.x === comida.x && head.y === comida.y) {
+        score += 10;
+        document.getElementById("score").textContent = score;
+        comida.x = Math.floor(Math.random() * (canvas.width/TAM)) * TAM;
+        comida.y = Math.floor(Math.random() * (canvas.height/TAM)) * TAM;
+      } else {
+        snake.shift();
+      }
+
+      // Colisiones
+      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height ||
+          snake.slice(0,-1).some(b => b.x === head.x && b.y === head.y)) {
+        alert("GAME OVER - Puntos: " + score);
+        document.location.reload();
+      }
+    }
+
+    function draw() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      drawFood();
+      drawSnake();
+    }
+
+    function loop() {
+      update();
+      draw();
+    }
+
+    document.addEventListener("keydown", e => {
+      if (e.key === "ArrowLeft") {dx = -TAM; dy = 0;}
+      else if (e.key === "ArrowRight") {dx = TAM; dy = 0;}
+      else if (e.key === "ArrowUp") {dx = 0; dy = -TAM;}
+      else if (e.key === "ArrowDown") {dx = 0; dy = TAM;}
+      else if (e.key.toLowerCase() === "t") {
+        skin_actual = (skin_actual % 4) + 1;
+        document.getElementById("skinName").textContent = skins[skin_actual].nombre;
+      }
+    });
+
+    setInterval(loop, 100);
+  </script>
+</body>
+</html>
